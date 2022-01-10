@@ -6,7 +6,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    this->setWindowTitle(tr("Turing-Post machine"));
+    this->setWindowTitle(tr("Post Machine"));
     this->main_widget = new QWidget();
     QVBoxLayout* main_layout = new QVBoxLayout();
     this->vector_line = new VectorLine(this, 21, 1000);
