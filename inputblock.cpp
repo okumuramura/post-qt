@@ -22,7 +22,7 @@ InputBlock::InputBlock(QWidget* p, int blocks) : QLabel(p)
 
     for (int i = 0; i < this->blocks; i++){
         InputLine* line = new InputLine(this, i, false);
-        connect(line, &InputLine::upd_command, this, &InputBlock::commandChanged);
+        connect(line, &InputLine::upd_command, this, &InputBlock::commandChange);
         connect(line, &InputLine::on_focus, this, &InputBlock::setFocusLine);
         this->lines[i] = line;
         input_layout->addWidget(line);
@@ -33,6 +33,7 @@ InputBlock::InputBlock(QWidget* p, int blocks) : QLabel(p)
 
 void InputBlock::clear_commands(){
     this->commands = std::vector<Command>(this->MAX_COMMANDS);
+    emit this->changed();
 }
 
 void InputBlock::move_down(){
@@ -119,10 +120,11 @@ void InputBlock::wheelEvent(QWheelEvent* e){
     }
 }
 
-void InputBlock::commandChanged(int id, int num, QString new_str, QString new_comment){
+void InputBlock::commandChange(int id, int num, QString new_str, QString new_comment){
     Q_UNUSED(id);
     this->commands[num].text = new_str;
     this->commands[num].comment = new_comment;
+    emit this->changed();
 }
 
 void InputBlock::setFocusLine(int id){
@@ -147,7 +149,7 @@ void InputBlock::keyPressEvent(QKeyEvent* e){
                 this->lines[this->focus_block + 1]->getCommand()->setFocus();
             else {
                 InputLine* line = this->lines[this->focus_block];
-                this->commandChanged(line->getId(), line->getLineNum(), line->getCommand()->text(), line->getComment()->text());
+                this->commandChange(line->getId(), line->getLineNum(), line->getCommand()->text(), line->getComment()->text());
                 this->move_down();
             }
         }
@@ -156,7 +158,7 @@ void InputBlock::keyPressEvent(QKeyEvent* e){
                 this->lines[this->focus_block - 1]->getCommand()->setFocus();
             else{
                 InputLine* line = this->lines[this->focus_block];
-                this->commandChanged(line->getId(), line->getLineNum(), line->getCommand()->text(), line->getComment()->text());
+                this->commandChange(line->getId(), line->getLineNum(), line->getCommand()->text(), line->getComment()->text());
                 this->move_up();
             }
         }

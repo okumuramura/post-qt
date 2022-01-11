@@ -58,8 +58,10 @@ public slots:
 
 
 private slots:
-    void commandChanged(int, int, QString, QString);
+    void commandChange(int, int, QString, QString);
 
+signals:
+    void changed();
 };
 
 #endif // INPUTBLOCK_H

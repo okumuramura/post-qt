@@ -26,6 +26,7 @@ public:
 
     VectorLine(QWidget*, int, int);
     void setMode(Mode);
+    void moveOnCursor();
     void moveOnCursor(int);
     std::vector<bool>* getVector();
     int getCursorPos();

@@ -34,6 +34,10 @@ private:
     void prepareMenu();
     bool processCommand(InputBlock::Command);
     void showHelp();
+    void showSaveDialog();
+    void showLoadDialog();
+    void newFile();
+    void updateTitle();
 
     QAction* new_action;
     QAction* save_action;
@@ -50,12 +54,17 @@ private:
     QString CONDITION = "?";
     QString END = "!";
 
+    QString WINDOW_TITLE = "Post Machine";
+    QString CURRENT_FILE = "";
+    bool is_saved = false;
 
 private slots:
     void start();
     void stop();
     void step();
     void pause();
+
+    void unsave();
 
 };
 #endif // MAINWINDOW_H

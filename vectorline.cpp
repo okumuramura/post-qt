@@ -154,12 +154,16 @@ void VectorLine::setMode(VectorLine::Mode mode){
     this->mode = mode;
 }
 
+void VectorLine::moveOnCursor(){
+    this->moveOnCursor(this->vec_size / 2);
+}
+
 void VectorLine::moveOnCursor(int pos){
     int left_node = pos - (this->node_count - 1) / 2;
     int right_node = pos + (this->node_count - 1) / 2;
     this->curs = pos;
     if (right_node >= static_cast<int>(this->vector.size())){
-        right_node = this->vector.size() - 1;
+        right_node = static_cast<int>(this->vector.size()) - 1;
         this->vend = right_node - this->spos;
         this->vbegin = this->vend - this->node_count + 1;
     }

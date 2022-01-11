@@ -3,13 +3,14 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    this->setWindowTitle(tr("Post Machine"));
+    this->updateTitle();
     this->main_widget = new QWidget();
     QVBoxLayout* main_layout = new QVBoxLayout();
     this->vector_line = new VectorLine(this, 21, 1000);
@@ -33,11 +34,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this->control_panel, &ControlPanel::pausing, this, &MainWindow::pause);
     connect(this->control_panel, &ControlPanel::steping_right, this, &MainWindow::step);
 
+    this->prepareCore();
+
     main_layout->addWidget(this->vector_line);
     main_layout->addWidget(this->input_block);
     main_layout->addWidget(this->control_panel);
     this->main_widget->setLayout(main_layout);
     this->setCentralWidget(this->main_widget);
+
+    connect(this->input_block, &InputBlock::changed, this, &MainWindow::unsave);
+}
+
+void MainWindow::updateTitle(){
+    QString br = "[%1]";
+    this->setWindowTitle(
+                QString("%1 [%2]%3")
+                .arg(this->WINDOW_TITLE)
+                .arg((this->CURRENT_FILE.isEmpty()) ? tr("new file") : this->CURRENT_FILE)
+                .arg((this->is_saved) ? tr("") : tr("*"))
+                );
 }
 
 void MainWindow::start(){
@@ -133,11 +148,10 @@ void MainWindow::prepareMenu(){
     // --------CONNECTIONS-------
     connect(this->exit_action, &QAction::triggered, this, &QWidget::close);
     connect(this->help_action, &QAction::triggered, this, &MainWindow::showHelp);
+    connect(this->save_action, &QAction::triggered, this, &MainWindow::showSaveDialog);
+    connect(this->load_action, &QAction::triggered, this, &MainWindow::showLoadDialog);
+    connect(this->new_action, &QAction::triggered, this, &MainWindow::newFile);
 
-
-    this->new_action->setEnabled(false);
-    this->save_action->setEnabled(false);
-    this->load_action->setEnabled(false);
 }
 
 // Help message window
@@ -167,6 +181,124 @@ void MainWindow::showHelp(){
                         .arg(this->END)
                         );
     help_window.exec();
+}
+
+void MainWindow::showSaveDialog(){
+    qDebug() << "debug still working!";
+    QString file_name = QFileDialog::getSaveFileName(
+                this,
+                tr("Save Post programm"),
+                "",
+                tr("Post files (*.pst);;All files (*)")
+                );
+
+    if (file_name.isEmpty())
+        return;
+
+    QFile file(file_name);
+    if (!file.open(QIODevice::WriteOnly)){
+        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
+        return;
+    }
+
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_1);
+
+    out << 0x66606660; // magic number
+    out << this->vector_line->getCursorPos();
+    out << static_cast<qint32>(this->vector->size());
+    for (size_t i = 0; i < this->vector->size(); i++){
+        out << static_cast<bool>(this->vector->at(i));
+    }
+
+    out << static_cast<size_t>(this->commands->size());
+
+    for (auto it = this->commands->begin(); it != this->commands->end(); it++){
+        out << it->text << it->comment;
+    }
+
+    this->CURRENT_FILE = file_name;
+    this->is_saved = true;
+    this->updateTitle();
+}
+
+void MainWindow::showLoadDialog(){
+    QString file_name = QFileDialog::getOpenFileName(
+                this,
+                tr("Open Post programm"),
+                "",
+                tr("Post files (*pst);;All files (*)")
+                );
+
+    if (file_name.isEmpty())
+        return;
+
+    QFile file(file_name);
+    if (!file.open(QIODevice::ReadOnly)){
+        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
+        return;
+    }
+
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_1);
+
+    qint32 magic;
+    in >> magic;
+
+    if (magic != 0x66606660){
+        QMessageBox::critical(this, "Unable to load from file", "Wrong file format!");
+        return;
+    }
+
+    qint32 tape_size;
+    int cur_position;
+
+    in >> cur_position;
+    in >> tape_size;
+
+    size_t tape_size_t = static_cast<size_t>(tape_size);
+    bool value;
+
+    this->vector->clear();
+    this->vector->resize(tape_size_t);
+
+    for (size_t i = 0; i < tape_size_t; i++){
+        in >> value;
+        this->vector->at(i) = value;
+    }
+
+    size_t commands_size;
+    InputBlock::Command com;
+    in >> commands_size;
+
+    this->input_block->clear_commands();
+
+    for (size_t i = 0; i < commands_size; i++){
+        in >> com.text >> com.comment;
+        this->commands->at(i) = com;
+    }
+
+    this->vector_line->moveOnCursor(cur_position);
+    this->input_block->updateLines();
+
+    this->CURRENT_FILE = file_name;
+    this->is_saved = true;
+    this->updateTitle();
+}
+
+void MainWindow::newFile(){
+    for (auto it = this->vector->begin(); it != this->vector->end(); it++){
+        *it = false;
+    }
+    this->vector_line->moveOnCursor();
+
+    this->input_block->clear_commands();
+    this->commands = this->input_block->getCommands();
+    this->input_block->moveOnCommand(0);
+
+    this->CURRENT_FILE = "";
+    this->is_saved = false;
+    this->updateTitle();
 }
 
 void MainWindow::prepareCore(){
@@ -270,6 +402,13 @@ bool MainWindow::processCommand(InputBlock::Command command){
     }
     else ok = false;
     return ok;
+}
+
+void MainWindow::unsave(){
+    if (this->is_saved){
+        this->is_saved = false;
+        this->updateTitle();
+    }
 }
 
 

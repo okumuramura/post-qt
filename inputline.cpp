@@ -23,7 +23,7 @@ InputLine::InputLine(QWidget* p, int id, bool head) : QLabel(p)
         this->command->setStyleSheet(tr("background: rgba(0, 0, 0, 0); border: none;"));
         this->command->setAlignment(Qt::AlignCenter);
         this->command->setFont(this->main_font);
-        connect(this->command, &QLineEdit::editingFinished, this, &InputLine::isChanging);
+        connect(this->command, &QLineEdit::textEdited, this, &InputLine::isChanging);
         connect(this->command, &MQLineEdit::on_focus, this, &InputLine::editOnFocus);
 
         this->comment = new MQLineEdit(this);
@@ -31,7 +31,7 @@ InputLine::InputLine(QWidget* p, int id, bool head) : QLabel(p)
         this->comment->setStyleSheet(tr("background: rgba(0, 0, 0, 0); border: none;"));
         this->comment->setAlignment(Qt::AlignCenter);
         this->comment->setFont(this->main_font);
-        connect(this->comment, &QLineEdit::editingFinished, this, &InputLine::isChanging);
+        connect(this->comment, &QLineEdit::textEdited, this, &InputLine::isChanging);
         connect(this->comment, &MQLineEdit::on_focus, this, &InputLine::editOnFocus);
 
         QHBoxLayout* line_layout = new QHBoxLayout();
