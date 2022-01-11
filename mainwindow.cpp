@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include <QBoxLayout>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
 
 #include <QDebug>
 
@@ -11,6 +14,10 @@ MainWindow::MainWindow(QWidget *parent)
     QVBoxLayout* main_layout = new QVBoxLayout();
     this->vector_line = new VectorLine(this, 21, 1000);
     this->input_block = new InputBlock(this, 10);
+
+    this->setWindowIcon(QIcon(":/icons/icons/postm.png"));
+
+    this->prepareMenu();
 
     this->control_panel = new ControlPanel(this);
 
@@ -89,6 +96,77 @@ void MainWindow::stop(){
     this->input_block->setActiveLine(-1);
     this->input_block->setErrorLine(-1);
 
+}
+
+void MainWindow::prepareMenu(){
+    // ---------ICONS------------
+    QPixmap new_pixmap(":/icons/icons/new.png");
+    QPixmap load_pixmap(":/icons/icons/load.png");
+    QPixmap save_pixmap(":/icons/icons/save.png");
+    QPixmap help_pixmap(":/icons/icons/help.png");
+    QPixmap exit_pixmap(":/icons/icons/exit.png");
+
+    this->new_action = new QAction(new_pixmap, "&New", this);
+    this->save_action = new QAction(save_pixmap, "&Save", this);
+    this->load_action = new QAction(load_pixmap, "&Load", this);
+    this->help_action = new QAction(help_pixmap, "&Help", this);
+    this->exit_action = new QAction(exit_pixmap, "&Quit", this);
+
+    QMenu* file_menu = menuBar()->addMenu("&File");
+    QMenu* about_menu = menuBar()->addMenu("&About");
+
+    file_menu->addAction(this->new_action);
+    file_menu->addAction(this->save_action);
+    file_menu->addAction(this->load_action);
+    file_menu->addSeparator();
+    file_menu->addAction(this->exit_action);
+
+    about_menu->addAction(this->help_action);
+
+    // --------SHORTCUTS---------
+    this->new_action->setShortcut(tr("CTRL+N"));
+    this->exit_action->setShortcut(tr("CTRL+Q"));
+    this->save_action->setShortcut(tr("CTRL+S"));
+    this->load_action->setShortcut(tr("CTRL+O"));
+    this->help_action->setShortcut(tr("F1"));
+
+    // --------CONNECTIONS-------
+    connect(this->exit_action, &QAction::triggered, this, &QWidget::close);
+    connect(this->help_action, &QAction::triggered, this, &MainWindow::showHelp);
+
+
+    this->new_action->setEnabled(false);
+    this->save_action->setEnabled(false);
+    this->load_action->setEnabled(false);
+}
+
+// Help message window
+void MainWindow::showHelp(){
+    QMessageBox help_window;
+    help_window.setWindowTitle("Help");
+    help_window.setWindowIcon(QIcon(":/icons/icons/help.png"));
+    QString help_text = "This is Post machine emulator by okumuramura.\n"
+                        "Commands:\n"
+                        "%1 - move to the right on the tape\n"
+                        "%2 - move to the left on the tape\n"
+                        "%3 - place a mark\n"
+                        "%4 - remove a mark\n"
+                        "%5{a};{b} - If there is a mark in the current cell, go to line a, otherwise go to line b.\n"
+                        "%6 - end point\n\n"
+                        "After the commands moving, place a mark and remove a mark, "
+                        "the execution goes to the line whose number is specified after it, "
+                        "if the number is not specified, the next line will be executed.\n\n"
+                        "The column with comments is for ease of human perception of the program and has no effect on execution.";
+
+    help_window.setText(help_text
+                        .arg(this->MOVE_RIGHT)
+                        .arg(this->MOVE_LEFT)
+                        .arg(this->SET_FLAG)
+                        .arg(this->REMOVE_FLAG)
+                        .arg(this->CONDITION)
+                        .arg(this->END)
+                        );
+    help_window.exec();
 }
 
 void MainWindow::prepareCore(){

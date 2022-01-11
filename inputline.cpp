@@ -105,8 +105,8 @@ void InputLine::paintEvent(QPaintEvent* e){
 
     if (this->is_head){
         painter.drawText(0, 0, this->size().height(), this->size().height(), Qt::AlignCenter, tr("#"));
-        painter.drawText(this->size().height(), 0, t, this->size().height(), Qt::AlignCenter, tr("Команда"));
-        painter.drawText(this->size().height() + t, 0, t, this->size().height(), Qt::AlignCenter, tr("Комментарий"));
+        painter.drawText(this->size().height(), 0, t, this->size().height(), Qt::AlignCenter, tr("Command"));
+        painter.drawText(this->size().height() + t, 0, t, this->size().height(), Qt::AlignCenter, tr("Comment"));
     }
     else
         painter.drawText(0, 0, this->size().height(), this->size().height(), Qt::AlignCenter, QString::number(this->line_num));

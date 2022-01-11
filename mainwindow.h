@@ -8,6 +8,7 @@
 #include <QMainWindow>
 
 #include <QTimer>
+#include <QAction>
 
 class MainWindow : public QMainWindow
 {
@@ -30,7 +31,15 @@ private:
     bool playing;
 
     void prepareCore();
+    void prepareMenu();
     bool processCommand(InputBlock::Command);
+    void showHelp();
+
+    QAction* new_action;
+    QAction* save_action;
+    QAction* load_action;
+    QAction* help_action;
+    QAction* exit_action;
 
     QTimer* step_timer;
 

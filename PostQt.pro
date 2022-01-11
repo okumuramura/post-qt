@@ -23,3 +23,6 @@ HEADERS += \
     node.h \
     vectorline.h
 
+RESOURCES += \
+    icons.qrc
+
