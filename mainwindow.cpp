@@ -211,7 +211,7 @@ void MainWindow::showSaveDialog(){
         out << static_cast<bool>(this->vector->at(i));
     }
 
-    out << static_cast<size_t>(this->commands->size());
+    out << static_cast<qint32>(this->commands->size());
 
     for (auto it = this->commands->begin(); it != this->commands->end(); it++){
         out << it->text << it->comment;
@@ -267,13 +267,16 @@ void MainWindow::showLoadDialog(){
         this->vector->at(i) = value;
     }
 
-    size_t commands_size;
+    size_t commands_size_t;
+    qint32 commands_size;
     InputBlock::Command com;
     in >> commands_size;
 
+    commands_size_t = static_cast<size_t>(commands_size);
+
     this->input_block->clear_commands();
 
-    for (size_t i = 0; i < commands_size; i++){
+    for (size_t i = 0; i < commands_size_t; i++){
         in >> com.text >> com.comment;
         this->commands->at(i) = com;
     }
