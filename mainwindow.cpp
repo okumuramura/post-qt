@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this->control_panel, &ControlPanel::steping_right, this, &MainWindow::step);
 
     this->prepareCore();
+    this->newFile();
 
     main_layout->addWidget(this->vector_line);
     main_layout->addWidget(this->input_block);
@@ -57,15 +58,15 @@ void MainWindow::updateTitle(){
 
 void MainWindow::start(){
     this->playing = true;
-    this->step();
+    //this->step();
     this->step_timer->start();
 
 }
 
 void MainWindow::step(){
-
     if (!this->core_prepared){
         this->prepareCore();
+        this->core_prepared = true;
         this->input_block->setActiveLine(0);
         this->input_block->moveOnCommand(0);
     }
@@ -87,7 +88,9 @@ void MainWindow::step(){
             }
         }
         else{
-            this->control_panel->stop_pressed();
+            if (this->playing)
+                this->control_panel->play_pressed();
+            this->control_panel->setMode(ControlPanel::Modes::STOP_ONLY);
         }
     }
 }
@@ -102,6 +105,8 @@ void MainWindow::pause(){
 }
 
 void MainWindow::stop(){
+    this->control_panel->setMode(ControlPanel::Modes::STAY);
+
     if (this->step_timer->isActive())
         this->step_timer->stop();
     this->core_prepared = false;
@@ -184,7 +189,7 @@ void MainWindow::showHelp(){
 }
 
 void MainWindow::showSaveDialog(){
-    qDebug() << "debug still working!";
+    this->prepareCore();
     QString file_name = QFileDialog::getSaveFileName(
                 this,
                 tr("Save Post programm"),
@@ -309,7 +314,6 @@ void MainWindow::prepareCore(){
     this->commands = this->input_block->getCommands();
     this->curs = this->vector_line->getCursorPos();
     this->current_command = 0;
-    this->core_prepared = true;
 }
 
 

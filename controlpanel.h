@@ -9,6 +9,15 @@ class ControlPanel : public QWidget
     Q_OBJECT
 public:
     ControlPanel(QWidget*);
+
+    enum Modes{
+        STAY,
+        PLAY,
+        STOP_ONLY,
+    };
+
+    void setMode(ControlPanel::Modes);
+
 private:
     CustomeButton* step_left;
     CustomeButton* stop;
@@ -17,8 +26,8 @@ private:
 
 public slots:
     void stop_pressed();
-private slots:
     void play_pressed();
+private slots:
 
     void step_left_pressed();
     void step_right_pressed();

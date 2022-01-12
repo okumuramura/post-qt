@@ -52,7 +52,6 @@ void ControlPanel::play_pressed(){
 }
 
 
-
 void ControlPanel::stop_pressed(){
     if (!this->step_right->isEnabled())
         this->step_right->setEnabled(true);
@@ -70,4 +69,22 @@ void ControlPanel::step_right_pressed(){
     emit this->steping_right();
 }
 
-
+void ControlPanel::setMode(ControlPanel::Modes mode){
+    if (mode == ControlPanel::Modes::PLAY){
+        this->stop->setEnabled(true);
+        this->play->setEnabled(true);
+        this->play->setType(CustomeButton::Types::pause);
+        this->step_right->setEnabled(true);
+    }
+    else if (mode == ControlPanel::Modes::STAY){
+        this->stop->setEnabled(true);
+        this->play->setEnabled(true);
+        this->play->setType(CustomeButton::Types::play);
+        this->step_right->setEnabled(true);
+    }
+    else if (mode == ControlPanel::Modes::STOP_ONLY){
+        this->stop->setEnabled(true);
+        this->play->setEnabled(false);
+        this->step_right->setEnabled(false);
+    }
+}
